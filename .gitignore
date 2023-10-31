@@ -1,3 +1,4 @@
-clasificador/*
 .vscode/
-test
+classifier/*
+classifier_resized/*
+model_test/*
