@@ -4,7 +4,7 @@ import time
 from flask import Flask, render_template, Response, request, jsonify
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import cv2
 
 from utils.predict_images import preprocessing_images, load_predict_model
@@ -33,9 +33,10 @@ def predict_image(image):
     object_predited = None
     index_argMax = predicts.argmax()
     probability = predicts[0][index_argMax]
-    print(probability)
+    # print(probability)
     if (max(predicts[0]) < 0.98):
-        print(" NO PREDIJO NADA")
+        # print(" NO PREDIJO NADA")
+        pass
     else:
         print(predicts.argmax())
         if (predicts.argmax() == 0):
@@ -45,7 +46,8 @@ def predict_image(image):
         elif (predicts.argmax() == 2):
             object_predited = "Traffic light"
         else:
-            print("CLASIFFIER ERROR")
+            # print("CLASIFFIER ERROR")
+            pass
         # socketio.emit(
         #     "prediction", {"value": object_predited})
     end_predict = time.time()
@@ -89,6 +91,7 @@ def video_feed():
 
 
 @app.route("/validate/predict", methods=["POST"])
+@cross_origin()
 def validate_predict():
     global last_frame
 
@@ -118,10 +121,59 @@ def validate_predict():
         cursor.close()
         con.close()
 
+        con = connectDB()
+        if con != None:
+            cursor = con.cursor()
+            cursor.execute(
+                f"""SELECT rc.signal_id,s.signal_name,  SUM(correct_predict = 1) AS num_correct_predictions, COUNT(rc.signal_id) AS total_signals FROM register_classification as rc INNER JOIN signals as s ON s.signal_id = rc.signal_id
+                GROUP BY rc.signal_id ;""")
+            records = cursor.fetchall()
+
+            json_list = [
+                {
+                    'signal_id': item[0],
+                    'signal_name': item[1],
+                    'totalCorrectPredictions': int(item[2]),
+                    'totalPredictions': item[3]
+                } for item in records
+            ]
+            cursor.close()
+            con.close()
+
+            socketio.emit("inset-data", json_list)
+
     else:
         print("NO hay una conexión")
 
     return jsonify(data)
+
+
+@app.route("/predictions", methods=["GET"])
+@cross_origin()
+def get_data_db():
+    con = connectDB()
+    if con != None:
+        cursor = con.cursor()
+        cursor.execute(
+            f"""SELECT rc.signal_id,s.signal_name,  SUM(correct_predict = 1) AS num_correct_predictions, COUNT(rc.signal_id) AS total_signals FROM register_classification as rc INNER JOIN signals as s ON s.signal_id = rc.signal_id
+            GROUP BY rc.signal_id ;""")
+        records = cursor.fetchall()
+
+        json_list = [
+            {
+                'signal_id': item[0],
+                'signal_name': item[1],
+                'totalCorrectPredictions': int(item[2]),
+                'totalPredictions': item[3]
+            } for item in records
+        ]
+        cursor.close()
+        con.close()
+
+    else:
+        print("NO hay una conexión")
+
+    return jsonify(json_list)
 
 
 if __name__ == "__main__":
