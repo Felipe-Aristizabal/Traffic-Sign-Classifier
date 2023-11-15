@@ -3,8 +3,8 @@ const Camera = ({ predictedImage }) => {
 		<div>
 			<img src="http://localhost:5000/video_feed" alt="Video" />
 			<h3>
-				{predictedImage.value === null ? "Uknown" : predictedImage.value} -{" "}
-				{parseFloat(predictedImage.probability).toFixed(4)}
+				{predictedImage.value === null ? "Uknown" : predictedImage.value} -
+				{predictedImage.value === null ? "" : parseFloat(predictedImage.probability).toFixed(4)}
 			</h3>
 		</div>
 	);
