@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import "./App.css";
+
 import { io } from "socket.io-client";
+
+import "./App.css";
+import Camera from "./components/Camera";
+import SelectForm from "./components/SelectForm";
 
 const socket = io("http://localhost:5000");
 
@@ -9,9 +13,12 @@ function App() {
 		value: "",
 		probability: "",
 	});
+	const [selectedOption, setSelectedOption] = useState(null);
+
 	useEffect(() => {
 		socket.on("prediction", (payload) => {
-			console.log(payload);
+			// console.log(payload);
+
 			setPredictedImage(payload);
 		});
 	}, []);
@@ -19,8 +26,8 @@ function App() {
 	return (
 		<>
 			<h1>Hello, I'm React 🤖</h1>
-			<img src="http://localhost:5000/video_feed" alt="Video" />
-			<h3>{predictedImage.value}</h3>
+			<Camera predictedImage={predictedImage} />
+			<SelectForm selectedOption={selectedOption} setSelectedOption={setSelectedOption} />
 		</>
 	);
 }
