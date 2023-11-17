@@ -12,7 +12,7 @@ const SelectForm = ({ selectedOption, setSelectedOption }) => {
 		e.preventDefault();
 		console.log(selectedOption);
 
-		const res = await axios.post("http://localhost:5000/validate/predict", {
+		const res = await axios.post(`${import.meta.env.VITE_BACKEND_HOST}/validate/predict`, {
 			id_selected: selectedOption.value,
 			name_selected: selectedOption.label,
 		});

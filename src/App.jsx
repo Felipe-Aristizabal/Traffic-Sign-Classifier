@@ -8,7 +8,7 @@ import Camera from "./components/Camera";
 import SelectForm from "./components/SelectForm";
 import ChartPredictions from "./components/ChartPredictions";
 
-const socket = io("http://localhost:5000");
+const socket = io(import.meta.env.VITE_BACKEND_HOST);
 
 function App() {
 	const [predictedImage, setPredictedImage] = useState({
@@ -20,10 +20,9 @@ function App() {
 	const [predictionsDB, setPredictionsDB] = useState([]);
 
 	const getDataBD = async () => {
-		const res = await axios.get("http://localhost:5000/predictions");
+		const res = await axios.get(`${import.meta.env.VITE_BACKEND_HOST}/predictions`);
 		console.log(res);
 		setPredictionsDB(res.data);
-		// setPredictedImage(payload);
 		// setPredictionsDB(payload);
 	};
 
@@ -32,6 +31,13 @@ function App() {
 
 		socket.on("inset-data", (payload) => {
 			console.log(payload);
+		});
+
+		socket.on("prediction", (payload) => {
+			// console.log(payload);
+			// console.log(payload);
+
+			setPredictedImage(payload);
 		});
 	}, []);
 

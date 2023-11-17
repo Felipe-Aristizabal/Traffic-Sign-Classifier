@@ -47,8 +47,9 @@ h1 {
 .info-database {
 	grid-area: info;
 	background-color: rgb(171, 177, 51);
+	min-width: 600px;
 	width: 100%;
-	min-height: 500px;
+	min-height: 200px;
 }
 
 .chart {
