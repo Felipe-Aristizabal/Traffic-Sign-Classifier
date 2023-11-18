@@ -45,7 +45,7 @@ function App() {
 
 	return (
 		<>
-			<Header/>
+			<Header />
 			<div className="flex-container">
 				<div className="main-grid">
 					<div className="Contenedor">

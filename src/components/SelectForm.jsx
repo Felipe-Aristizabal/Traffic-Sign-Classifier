@@ -45,7 +45,9 @@ const SelectForm = ({ selectedOption, setSelectedOption }) => {
 		<>
 			<form action="" onSubmit={handleSubmit}>
 				<Select defaultValue={selectedOption} onChange={setSelectedOption} options={options} />
-				<button type="submit">Verificar</button>
+				<div className="flex-container">
+					<button type="submit">Verificar</button>
+				</div>
 			</form>
 			<audio src={audioObject} ref={audioRef}></audio>
 		</>

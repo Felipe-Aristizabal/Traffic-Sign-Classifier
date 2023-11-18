@@ -9,6 +9,10 @@ const options = {
 	plugins: {
 		legend: {
 			position: "top",
+			color: "#fff",
+			labels: {
+				color: "#fff",
+			},
 		},
 		labels: {
 			color: "#fff",
@@ -61,9 +65,9 @@ const ChartPredictions = ({ data }) => {
 	};
 
 	return (
-		<div className="chart">
+		<>
 			<Bar options={options} data={dataChart} />
-		</div>
+		</>
 	);
 };
 
