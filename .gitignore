@@ -1,4 +1,7 @@
 .vscode/
 classifier/*
 classifier_resized/*
+classifier_resized_VGG16/*
+classifier_resized_TL_InceptionV3/*
 model_test/*
+models/*
