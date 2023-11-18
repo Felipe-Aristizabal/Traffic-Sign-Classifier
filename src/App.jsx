@@ -29,8 +29,9 @@ function App() {
 	useEffect(() => {
 		getDataBD();
 
-		socket.on("inset-data", (payload) => {
+		socket.on("insert-data", (payload) => {
 			console.log(payload);
+			setPredictionsDB(payload);
 		});
 
 		socket.on("prediction", (payload) => {
