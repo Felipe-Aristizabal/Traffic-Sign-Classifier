@@ -16,6 +16,7 @@ const SelectForm = ({ selectedOption, setSelectedOption }) => {
 			id_selected: selectedOption.value,
 			name_selected: selectedOption.label,
 		});
+
 		audioRef.current.pause();
 		audioRef.current.load();
 		if (res.data.name_selected === "Speed") {
