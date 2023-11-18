@@ -1,5 +1,4 @@
 import os
-import time
 
 from flask import Flask, render_template, Response, request, jsonify
 from flask_socketio import SocketIO
@@ -7,54 +6,22 @@ from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
 import cv2
 
-from utils.predict_images import preprocessing_images, load_predict_model
-from db.mysql_connector import connectDB
+from utils.predict_images import preprocessing_images, load_predict_model, predict_image
+from db.manipulate_data import insert_prediction_data, get_all_predictions_db
 
-# take environment variables from .env.
+# Cargamos las variables de entorno del archivo .env
 load_dotenv()
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
-# Capture the default camera capture device
-cap = cv2.VideoCapture(0)
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Load the model that we want to use
+# Cargamos el modelo de clasificación que nosotros deseamos.
 model = load_predict_model()
-
+# Capturamos la entrada de video por defecto que posea el dispositivo.
+cap = cv2.VideoCapture(0)
+# En esta variable se almacenará el último frame que registre la cámara.
 last_frame = None
-
-
-def predict_image(image):
-    start_predict = time.time()
-
-    predicts = (model.predict(image))
-    # print(predicts)
-    object_predited = None
-    index_argMax = predicts.argmax()
-    probability = predicts[0][index_argMax]
-    # print(probability)
-    if (max(predicts[0]) < 0.98):
-        # print(" NO PREDIJO NADA")
-        pass
-    else:
-        print(predicts.argmax())
-        if (predicts.argmax() == 0):
-            object_predited = "Speed"
-        elif (predicts.argmax() == 1):
-            object_predited = "Stop"
-        elif (predicts.argmax() == 2):
-            object_predited = "Traffic light"
-        else:
-            # print("CLASIFFIER ERROR")
-            pass
-        # socketio.emit(
-        #     "prediction", {"value": object_predited})
-    end_predict = time.time()
-    socketio.emit(
-        "prediction", {"value": object_predited, "probability": float(probability), "timeToPredict": int(end_predict)})
-    print(f"Time: {end_predict-start_predict} seconds")
-    return object_predited
 
 
 def capture_camera():
@@ -62,14 +29,17 @@ def capture_camera():
     while True:
         ret, frame = cap.read()
 
-        # Flip the camera
+        # Inverimos la cámara en el eje x.
         frame = cv2.flip(frame, 1)
-
-        # TODO: build the preprocessing here
+        # Realizamos el preprocesamiento a nuestra imagen actual
         image = preprocessing_images(frame)
 
-        # PREDICT IMAGE
-        predict_image(image)
+        # Predecimos con nuestro modelo la imagen ya preprocesada.
+        prediction_results = predict_image(image, model)
+
+        socketio.emit(
+            "prediction", prediction_results)
+        # print(f"Time: {prediction_results['timeToPredict']} seconds")
 
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         last_frame = frame
@@ -79,11 +49,6 @@ def capture_camera():
                bytearray(encodedImage) + b'\r\n')
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
 @app.route("/video_feed")
 def video_feed():
     return Response(capture_camera(),
@@ -91,59 +56,35 @@ def video_feed():
 
 
 @app.route("/validate/predict", methods=["POST"])
-@cross_origin()
 def validate_predict():
     global last_frame
 
+    # Obtenemos la información mandada en el body de la petición POST.
     data = request.get_json()
-
-    image = preprocessing_images(last_frame)
-    result_classifier = predict_image(image)
-
+    # Obtenemos la información del usuario enviada por el formulario. Exactamente, los valores de las clasves "signal_by_user" y "name_by_user"
     signal_by_user = data["id_selected"]
     name_by_user = data["name_selected"]
-    correct_clasiffication = 0
 
-    # ! COMPARAR SI LA ENTRADA DEL USUARIO Y EL PREDICTOR SON IGUALES
-    if (name_by_user == result_classifier):
+    # Realizamos el preprocesamiento y predicción de la última imagen guardada en la variable global.
+    image = preprocessing_images(last_frame)
+    result_classifier = predict_image(image, model)
+
+    # Por defecto el clasificador tomará que el modelo no predijo bien
+    correct_clasiffication = 0
+    print(
+        f"Dicho por el usuario: {signal_by_user} - Detectado por el modelo {result_classifier['value']}")
+
+    # COMPARAR SI LA ENTRADA DEL USUARIO Y EL PREDICTOR SON IGUALES
+    if (name_by_user == result_classifier["value"]):
+        # Se almacenará en la BD que el clasificador hizo su labor correctamente.
         correct_clasiffication = 1
     else:
+        # Se almancenará en la BD que el clasificador obtuvo un falso positivo.
         correct_clasiffication = 0
 
-    # TODO: Save in BD
-    con = connectDB()
-    if con != None:
-        cursor = con.cursor()
-        result_classifier = cursor.execute(
-            f"""INSERT INTO `register_classification` VALUES(default,%s,default, %s);""", (signal_by_user, correct_clasiffication))
-        print(result_classifier)
-        con.commit()
-        cursor.close()
-        con.close()
-
-        con = connectDB()
-        if con != None:
-            cursor = con.cursor()
-            cursor.execute(
-                f"""SELECT rc.signal_id,s.signal_name,  SUM(correct_predict = 1) AS num_correct_predictions, COUNT(rc.signal_id) AS total_signals FROM register_classification as rc INNER JOIN signals as s ON s.signal_id = rc.signal_id
-                GROUP BY rc.signal_id ;""")
-            records = cursor.fetchall()
-
-            json_list = [
-                {
-                    'signal_id': item[0],
-                    'signal_name': item[1],
-                    'totalCorrectPredictions': int(item[2]),
-                    'totalPredictions': item[3]
-                } for item in records
-            ]
-            cursor.close()
-            con.close()
-
-            socketio.emit("inset-data", json_list)
-
-    else:
-        print("NO hay una conexión")
+    new_data = insert_prediction_data(signal_by_user, correct_clasiffication)
+    # Enviamos al cliente los nuevos datos actualizados.
+    socketio.emit("insert-data", new_data)
 
     return jsonify(data)
 
@@ -151,29 +92,9 @@ def validate_predict():
 @app.route("/predictions", methods=["GET"])
 @cross_origin()
 def get_data_db():
-    con = connectDB()
-    if con != None:
-        cursor = con.cursor()
-        cursor.execute(
-            f"""SELECT rc.signal_id,s.signal_name,  SUM(correct_predict = 1) AS num_correct_predictions, COUNT(rc.signal_id) AS total_signals FROM register_classification as rc INNER JOIN signals as s ON s.signal_id = rc.signal_id
-            GROUP BY rc.signal_id ;""")
-        records = cursor.fetchall()
-
-        json_list = [
-            {
-                'signal_id': item[0],
-                'signal_name': item[1],
-                'totalCorrectPredictions': int(item[2]),
-                'totalPredictions': item[3]
-            } for item in records
-        ]
-        cursor.close()
-        con.close()
-
-    else:
-        print("NO hay una conexión")
-
-    return jsonify(json_list)
+    # Obtenemos toda la información de la BD y la retonamos al usuario.
+    all_predictions_db = get_all_predictions_db()
+    return jsonify(all_predictions_db)
 
 
 if __name__ == "__main__":
