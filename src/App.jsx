@@ -7,6 +7,7 @@ import "./App.css";
 import Camera from "./components/Camera";
 import SelectForm from "./components/SelectForm";
 import ChartPredictions from "./components/ChartPredictions";
+import Header from "./components/Header";
 
 const socket = io(import.meta.env.VITE_BACKEND_HOST);
 
@@ -43,10 +44,10 @@ function App() {
 
 	return (
 		<>
-			<h1>Traffic Sign classifier</h1>
+			<Header/>
 			<div className="flex-container">
 				<div className="main-grid">
-					<div className="detect-zone">
+					<div className="Contenedor">
 						<Camera predictedImage={predictedImage} />
 						<SelectForm selectedOption={selectedOption} setSelectedOption={setSelectedOption} />
 					</div>
