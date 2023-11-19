@@ -14,7 +14,8 @@ const socket = io(import.meta.env.VITE_BACKEND_HOST);
 function App() {
 	const [predictedImage, setPredictedImage] = useState({
 		value: "",
-		probability: "",
+		probability: 0,
+		timeToPredict: 0,
 	});
 
 	const [selectedOption, setSelectedOption] = useState(null);
@@ -37,7 +38,7 @@ function App() {
 
 		socket.on("prediction", (payload) => {
 			// console.log(payload);
-			// console.log(payload);
+			console.log(payload);
 
 			setPredictedImage(payload);
 		});
