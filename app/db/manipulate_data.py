@@ -5,13 +5,16 @@ def get_all_predictions_db():
     con = connectDB()
     if con != None:
         cursor = con.cursor()
-        # Obtenemos todos los registros de la base de datos de la siguiente manera: [id_señal, suma de las predicciones correctas, total de predicciones registradas]
+        # Obtenemos todos los registros de la base de datos de la siguiente manera:
+        # [id_señal, suma de las predicciones correctas, total de predicciones registradas]
         cursor.execute(
-            f"""SELECT rc.signal_id,s.signal_name,  SUM(correct_predict = 1) AS num_correct_predictions, COUNT(rc.signal_id) AS total_signals FROM register_classification as rc INNER JOIN signals as s ON s.signal_id = rc.signal_id
-            GROUP BY rc.signal_id ;""")
+            f"""SELECT rc.signal_id,s.signal_name,  SUM(correct_predict = 1) AS num_correct_predictions,
+            COUNT(rc.signal_id) AS total_signals FROM register_classification as rc 
+            INNER JOIN signals as s ON s.signal_id = rc.signal_id GROUP BY rc.signal_id ;""")
         records = cursor.fetchall()
 
-        # El arreglo resultante del método fetchall() lo convertimos en un solo arreglo con varios diccionarios, iterándose por medio de un for.
+        # El arreglo resultante del método fetchall() lo convertimos en un solo arreglo
+        # con varios diccionarios, iterándose por medio de un for.
         json_list = [
             {
                 'signal_id': item[0],
@@ -25,7 +28,7 @@ def get_all_predictions_db():
         con.close()
         return json_list
     else:
-        print("Error, no hay información en la BD.")
+        raise Exception("ERROR: NO hay una conexión a la BD.")
 
 
 def insert_prediction_data(signal_by_user, correct_clasiffication):
@@ -45,4 +48,4 @@ def insert_prediction_data(signal_by_user, correct_clasiffication):
         all_predictions_db = get_all_predictions_db()
         return all_predictions_db
     else:
-        print("NO hay una conexión")
+        raise Exception("ERROR: NO hay una conexión a la BD.")

@@ -39,7 +39,7 @@ def capture_camera():
 
         socketio.emit(
             "prediction", prediction_results)
-        # print(f"Time: {prediction_results['timeToPredict']} seconds")
+        print(f"Time: {prediction_results['timeToPredict']} seconds")
 
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         last_frame = frame
@@ -90,7 +90,6 @@ def validate_predict():
 
 
 @app.route("/predictions", methods=["GET"])
-@cross_origin()
 def get_data_db():
     # Obtenemos toda la información de la BD y la retonamos al usuario.
     all_predictions_db = get_all_predictions_db()
