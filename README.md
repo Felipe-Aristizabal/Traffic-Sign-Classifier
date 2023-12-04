@@ -4,15 +4,38 @@ The model used for traffic signal classification named `ModelV3_InceptionV3.h5` 
 
 ## Team Members
 
-- [Andrés Felipe Aristizábal Miranda](https://github.com/Felipe-Aristizabal)
-- [Andrés Bonilla Galindo](https://github.com/AndresBonilla0306)
-- [Hector Fabio Romero Bocanegra](https://github.com/Hector-f-Romero)
+-   [Andrés Felipe Aristizábal Miranda](https://github.com/Felipe-Aristizabal)
+-   [Andrés Bonilla Galindo](https://github.com/AndresBonilla0306)
+-   [Hector Fabio Romero Bocanegra](https://github.com/Hector-f-Romero)
+
+## Overview
+
+-   [Introduction and Problem Description](#introduction-and-problem-description)
+-   [Getting Started](#getting-started)
+-   [Machine Learning Problem](#machine-learning-problem)
+-   [Data Collection and Preprocessing Methodology](#data-collection-and-preprocessing-methodology)
+-   [Deployment Architecture Selection](#deployment-architecture-selection)
+-   [Flask Application Description and Functionality](#flask-application-description-and-functionality)
+-   [Datasets](#flask-application-description-and-functionality)
 
 ## Introduction and Problem Description
 
 In Colombia, road safety education is crucial for all ages. This project, in the field of Digital Image Processing, introduces a necessary tool to promote basic traffic signal knowledge among younger generations, specifically fifth graders in Santiago de Cali schools. The traffic signal classification system employs advanced technology for real-time detection and information provision, aiding children and their families in making safe road decisions.
 
 The team aims to develop a real-time image classifier for traffic signals throughout Santiago de Cali, capable of recognizing stop, speed, and traffic light signals under good daylight conditions. This will be achieved using Python and deployed locally on a web application, allowing end-users to utilize this tool without downloading external applications. Additionally, a MySQL database will record the classifier model's results for subsequent analysis and visualization.
+
+## Getting Started - Backend
+
+1. Clone the branch `main` [here](https://github.com/Felipe-Aristizabal/Traffic-Sign-Classifier)
+2. Configure the MySQL user and run the script `database-config-start.sql`
+3. Download the model `ModelV3_InceptionV3.h5` in the next [link](https://uao-my.sharepoint.com/:f:/r/personal/andres_aristizabal_m_uao_edu_co/Documents/7.%20S%C3%A9ptimo%20semestre/PDI/Modelos/Traffic%20Signal%20recognition?csf=1&web=1&e=qfQNDn). Put the file in the route `models`.
+4. Install `virtualenv` to management the version of the libraries with `pip install virtualenv`.
+5. Create a virtual enviroment with `python -m virtualenv env`.
+6. Run `.\env\Scripts\activate` to active the virtual enviroment.
+7. Run `pip install -r "requirements.txt"` to install all the libraries used with the specific version.
+8. Create a `.env` file inside the `app` folder. Configure the enviroment variables in: `HOST, PORT, DB_USER, DB_PASSWORD, DB_HOST, DB_DATABASE, PORT_DB`.
+9. Execute the project in `frontend` branch. To configure this part, look its `README.md` in that [branch](https://github.com/Felipe-Aristizabal/Traffic-Sign-Classifier/tree/frontend).
+10. Run in terminal `python .\app\main.py`
 
 ## Machine Learning Problem
 
@@ -40,9 +63,7 @@ A Flask server was developed to interact with a web page as required by the proj
 
 The datasets used for this project were sourced from a combination of proprietary collection and public databases to ensure a balanced and representative dataset for training the model. The following datasets were specifically used:
 
-- Traffic Sign Dataset found on Roboflow with CC BY 4.0 license, which can be consulted at this [link](https://public.roboflow.com/object-detection/traffic-sign).
-  
-- Road Sign Detection found on Kaggle with a CC0 license, which can be accessed at this [link](https://www.kaggle.com/andrewmvd/road-sign-detection).
+-   Traffic Sign Dataset found on Roboflow with CC BY 4.0 license, which can be consulted at this [link](https://public.roboflow.com/object-detection/traffic-sign).
+-   Road Sign Detection found on Kaggle with a CC0 license, which can be accessed at this [link](https://www.kaggle.com/andrewmvd/road-sign-detection).
 
 These external sources were fundamental in enriching the dataset and facilitating robust training and precise evaluation of the traffic signal classification model.
-

@@ -1,4 +1,5 @@
 import os
+import time
 
 from flask import Flask, render_template, Response, request, jsonify
 from flask_socketio import SocketIO
@@ -27,15 +28,26 @@ last_frame = None
 def capture_camera():
     global last_frame
     while True:
+        capture_image_start_time = time.time()
         ret, frame = cap.read()
+        capture_image_finish_time = time.time()
 
         # Inverimos la cámara en el eje x.
         frame = cv2.flip(frame, 1)
+
+        preprocessing_image_start_time = time.time()
         # Realizamos el preprocesamiento a nuestra imagen actual
         image = preprocessing_images(frame)
+        preprocessing_image_finish_time = time.time()
 
         # Predecimos con nuestro modelo la imagen ya preprocesada.
         prediction_results = predict_image(image, model)
+
+        # Añadimos los demás tiempos calculados previamente descritos
+        prediction_results["timeToCaptureImage"] = float(
+            capture_image_finish_time-capture_image_start_time)
+        prediction_results["timeToPreprocessingImage"] = float(
+            preprocessing_image_finish_time-preprocessing_image_start_time)
 
         socketio.emit(
             "prediction", prediction_results)

@@ -9,11 +9,11 @@ from tensorflow.keras.models import load_model
 def preprocessing_images(image):
 
     # Reescalamos la imagen de acuerdo con las indicaciones de la arquitectura de CNN escogida
-    resized_img = cv2.resize(image, (224, 224))
+    resized_img = cv2.resize(image, (299, 299))
     # Normalizamos los valores de los pixeles de 0 a 1, puesto que 255 es el mayor valor de intensidad que nuestra imagen es 255.
     normalized_img = resized_img / 255.0
     # Convertimos nuetra imagen a tensor. Esta será nuestra entrada para el modelo entrenado.
-    tensor_img = np.reshape(normalized_img, (1, 224, 224, 3))
+    tensor_img = np.reshape(normalized_img, (1, 299, 299, 3))
     return tensor_img
 
 
@@ -23,7 +23,7 @@ def load_predict_model():
 
     # Construir la ruta hacia first-model.h5
     model_path = current_directory / 'app' / \
-        'models' / 'VGG16_v1.h5'
+        'models' / 'ModelV3_InceptionV3.h5'
 
     model_test = load_model(model_path)
     return model_test
