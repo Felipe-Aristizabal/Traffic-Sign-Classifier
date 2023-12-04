@@ -11,7 +11,7 @@ The model used for traffic signal classification named `ModelV3_InceptionV3.h5` 
 ## Overview
 
 -   [Introduction and Problem Description](#introduction-and-problem-description)
--   [Getting Started](#getting-started)
+-   [Getting Started](#getting-started-frontend)
 -   [Machine Learning Problem](#machine-learning-problem)
 -   [Data Collection and Preprocessing Methodology](#data-collection-and-preprocessing-methodology)
 -   [Deployment Architecture Selection](#deployment-architecture-selection)
